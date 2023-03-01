@@ -18,5 +18,3 @@ document.querySelector('#app').innerHTML = `
     </window-manager>
   </div>
 `
-
-setupCounter(document.querySelector('#counter'))

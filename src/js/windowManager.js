@@ -3,6 +3,37 @@ const LOCKED = [];
 document.addEventListener("keydown", (e)=>{if(!KEYPRESSES.includes(e.key)){KEYPRESSES.push(e.key);}})
 document.addEventListener("keyup", (e)=>{KEYPRESSES.pop(e.key)})
 
+const Window = {
+  programming: {
+    title: "<i></i> Code editor",
+    content: "<custom-text-editor></custom-text-editor>"
+  }
+}
+
+export class CustomTextEditor extends HTMLElement{
+  constructor(){
+    super();
+  }
+
+  parseTextEditor(e){
+    let val = e.target.value
+    let lines = val.split("\n").length
+    let editorcols = this.querySelector(".custom-text-editor-columns")
+    editorcols.innerHTML = ""
+    for(let i = 1; i < lines+1; i++){
+      let paragraph = document.createElement("p")
+      paragraph.innerText = i
+      editorcols.appendChild(paragraph)
+    }
+  }
+
+  connectedCallback(){
+    this.innerHTML = "<div class='custom-text-editor-columns'>1</div><textarea wrap='off' class='custom-text-editor' spellcheck='false'></textarea>"
+    this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
+    
+  }
+}
+
 export class WindowManager extends HTMLElement{
   constructor(){
     super();
@@ -38,7 +69,7 @@ export class WindowManager extends HTMLElement{
     return column
   }
 
-  moveSelectedWindowFromColumn(axis){
+  moveWindowHorizontally(axis){
     let selectedColumn = this.selectedWindow.parentElement
     let children = Array.from(this.children)
     let index = children.indexOf(selectedColumn)+axis
@@ -56,6 +87,15 @@ export class WindowManager extends HTMLElement{
       column.appendChild(this.selectedWindow)
     }
     
+  }
+
+  moveSelectedWindowInsideColumn(axis){
+    let selectedColumn = this.selectedWindow.parentElement
+    let children = Array.from(selectedColumn.children)
+    let index = children.indexOf(this.selectedWindow)+axis
+    if(selectedColumn.children.length > 1){
+      //children[index]
+    }
   }
 
   selectWindowInColumn(axis){
@@ -86,7 +126,7 @@ export class WindowManager extends HTMLElement{
 
 
     if(KEYPRESSES.includes("ArrowRight") && KEYPRESSES.includes("e") && !LOCKED.includes("ArrowRight")){
-      this.moveSelectedWindowFromColumn(1)
+      this.moveWindowHorizontally(1)
       LOCKED.push("ArrowRight")
     }   
     if(KEYPRESSES.includes("ArrowRight") && !KEYPRESSES.includes("e") && !LOCKED.includes("ArrowRight")){
@@ -96,7 +136,7 @@ export class WindowManager extends HTMLElement{
     if(!KEYPRESSES.includes("ArrowRight") && LOCKED.includes("ArrowRight")){LOCKED.splice(LOCKED.indexOf("ArrowRight", 1))}
 
     if(KEYPRESSES.includes("ArrowLeft") && KEYPRESSES.includes("e") && !LOCKED.includes("ArrowLeft")){
-      this.moveSelectedWindowFromColumn(-1)
+      this.moveWindowHorizontally(-1)
       LOCKED.push("ArrowLeft")
     } 
     if(KEYPRESSES.includes("ArrowLeft") && !KEYPRESSES.includes("e") && !LOCKED.includes("ArrowLeft")){
@@ -132,7 +172,7 @@ export class WindowManager extends HTMLElement{
   }
 
   connectedCallback(){
-    this.createNewWindow({title: "Hello", content: `<iframe class="window-full" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`});
+    this.createNewWindow(Window.programming);
     this.createNewWindow();
 
     setInterval(()=>{this.listenForKeyPresses()}, 10)
@@ -142,10 +182,19 @@ export class WindowManager extends HTMLElement{
 export class CustomWindow extends HTMLElement{
   constructor(){
     super();
-
-
   }
- 
+
+  set created(val){
+    this.setAttribute("created", val)
+  }
+
+  get created(){
+    if(!this.hasAttribute("created")){
+      this.setAttribute('created', "false")
+    }
+    return (this.getAttribute("created") === 'true')
+  }
+
   set title(val){
     this.setAttribute("title", val)
   }
@@ -170,22 +219,31 @@ export class CustomWindow extends HTMLElement{
   }
 
   connectedCallback(){
-    this.innerHTML = `
-      <div class="window-titlebar">
-        <p class="window-title">${this.title}</p>
-        <div class="window-buttons">
-          <i class="ti ti-x window-close-button"></i>
+    if(this.created == false){
+      this.created = true
+      console.log(this.created)
+      this.innerHTML = `
+        <div class="window-titlebar">
+          <p class="window-title">${this.title}</p>
+          <div class="window-buttons">
+            <i class="ti ti-x window-close-button"></i>
+          </div>
         </div>
-      </div>
-      <div class="window-content">
-        ${this.content}
-      </div>
-    `
-    this.classList.add("window-container")
-    this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
+        <div class="window-content">
+          ${this.content}
+        </div>
+      `  
+      this.querySelector(".window-content").innerHTML = this.content
+      this.classList.add("window-container")
+      this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
+    }
+
+    this.querySelector(".window-title").innerHTML = this.title
+
     
   }
 }
 
 customElements.define("window-manager", WindowManager)
 customElements.define("custom-window", CustomWindow)
+customElements.define("custom-text-editor",CustomTextEditor)
