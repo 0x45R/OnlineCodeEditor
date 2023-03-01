@@ -1,5 +1,5 @@
-import '/src/css/style.css'
-import '/src/js/windowManager.js'
+import '../css/style.css'
+import './windowManager.js'
 
 document.querySelector('#app').innerHTML = `
   <div class="main-container">
