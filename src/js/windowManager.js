@@ -1,3 +1,5 @@
+import bashEmulator from "bash-emulator";
+
 export class WindowManager extends HTMLElement{
   constructor(){
     super();
@@ -56,7 +58,7 @@ export class WindowManager extends HTMLElement{
         column.appendChild(this.selectedWindow)
       }
     }
-    if(!outOfBounds){
+    else if(!outOfBounds){
       let column = children[index]
       this.selectedWindow.parentElement.remove();
       column.appendChild(this.selectedWindow)
@@ -253,6 +255,50 @@ export class CustomWindow extends HTMLElement{
 export class TerminalEmulator extends CustomWindow{
   constructor(){
     super();
+    this.emulator = bashEmulator({
+      workingDirectory: "/",
+      fileSystem: {
+        '/':{
+          type:'dir',
+          modified: Date.now()
+        },
+        '/README.txt':{
+          type: "file",
+          modified: Date.now(),
+          content: "Hello!"
+        }
+      }
+    })
+    this.emulator.commands.clear = (env)=> {
+      this.content = ''
+      env.exit()
+    }
+  }
+  set content(val){
+    this._content = val;
+    if(this.querySelector('.terminal-emulator-content')){
+      this.querySelector('.terminal-emulator-content').innerHTML = val;
+    }
+  }
+  get content(){
+    return this._content;
+  }
+
+  error(result){
+    if(result){
+      this.content = this.content + result+"\n"
+    }
+  }
+
+  run (cmd){
+    this.log('$ ' + cmd)
+    return this.emulator.run(cmd).then((value)=>{this.log(value)}, (value)=>{this.error(value)})
+  }
+
+  log(result){
+    if(result){
+      this.content = this.content + result+"\n"
+    }
   }
   connectedCallback(){
     this.title = "Terminal Emulator"
@@ -264,18 +310,27 @@ export class TerminalEmulator extends CustomWindow{
           <i class="ti ti-x window-close-button"></i>
         </div>
       </div>
-      <div class="window-content">
-        <textarea wrap='off' class='terminal-emulator-content' spellcheck='false'>${this.content}</textarea>
+      <div class="window-terminal-content">
+        <p class='terminal-emulator-content' spellcheck='false'></p>
+        <input type='text' class='terminal-emulator-input'></input>
       </div>
     `  
     this.querySelector(".terminal-emulator-content").innerHTML = this.content
     this.classList.add("window-container")
 
-    this.querySelector(".terminal-emulator-content").addEventListener("input", (e)=>{this.parseTextEditor(e)})
+    this.querySelector(".window-title").innerHTML = this.title
+
+    this.querySelector(".terminal-emulator-input").addEventListener('keydown', (e)=>{
+      console.log(e)
+      let target = this.querySelector('.terminal-emulator-input')
+      if(e.key == "Enter"){
+        this.run(target.value)
+        target.value = ""
+      }
+    }) //ddEventListener("input", (e)=>{this.parseEmulator(e)})
     this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
 
-
-    this.querySelector(".window-title").innerHTML = this.title
+    this.run('pwd')
   }
 }
 export class CustomTextEditor extends CustomWindow{
