@@ -1,39 +1,3 @@
-const KEYPRESSES = [];
-const LOCKED = [];
-document.addEventListener("keydown", (e)=>{if(!KEYPRESSES.includes(e.key)){KEYPRESSES.push(e.key);}})
-document.addEventListener("keyup", (e)=>{KEYPRESSES.pop(e.key)})
-
-const Window = {
-  programming: {
-    title: "<i></i> Code editor",
-    content: "<custom-text-editor></custom-text-editor>"
-  }
-}
-
-export class CustomTextEditor extends HTMLElement{
-  constructor(){
-    super();
-  }
-
-  parseTextEditor(e){
-    let val = e.target.value
-    let lines = val.split("\n").length
-    let editorcols = this.querySelector(".custom-text-editor-columns")
-    editorcols.innerHTML = ""
-    for(let i = 1; i < lines+1; i++){
-      let paragraph = document.createElement("p")
-      paragraph.innerText = i
-      editorcols.appendChild(paragraph)
-    }
-  }
-
-  connectedCallback(){
-    this.innerHTML = "<div class='custom-text-editor-columns'>1</div><textarea wrap='off' class='custom-text-editor' spellcheck='false'></textarea>"
-    this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
-    
-  }
-}
-
 export class WindowManager extends HTMLElement{
   constructor(){
     super();
@@ -44,10 +8,14 @@ export class WindowManager extends HTMLElement{
   get windowColumns(){
     return this.querySelectorAll(".window-column")
   }
- 
+
+  get allWindows(){
+    return this.querySelectorAll(".window-container")
+  }
+
   get selectedWindow(){
     if(this._selectedWindow == undefined){
-      return this.querySelector("custom-window")
+      return this.querySelector(".window-container")
     }
     return this._selectedWindow
   }
@@ -55,6 +23,7 @@ export class WindowManager extends HTMLElement{
   set selectedWindow(val){
     this.selectedWindow.classList.remove("selected-window")
     this._selectedWindow = val;
+    val.onFocus()
     val.classList.add("selected-window")
   }
 
@@ -69,33 +38,63 @@ export class WindowManager extends HTMLElement{
     return column
   }
 
-  moveWindowHorizontally(axis){
+  moveSelectedWindowHorizontally(axis){
     let selectedColumn = this.selectedWindow.parentElement
     let children = Array.from(this.children)
     let index = children.indexOf(selectedColumn)+axis
-    if( (index < 0 || index > children.length -1) && selectedColumn.children.length > 1){      
-      let column = this.createNewColumn(axis)
-      column.appendChild(this.selectedWindow)  
+    
+    let outOfBounds = (index < 0 || index > children.length -1)
+    let moreThanOneChild = (selectedColumn.children.length > 1)
+
+    if(moreThanOneChild){
+      if(outOfBounds){
+        let column = this.createNewColumn(axis)
+        column.appendChild(this.selectedWindow)
+      }
+      else{
+        let column = children[index]
+        column.appendChild(this.selectedWindow)
+      }
     }
-    else if(selectedColumn.children.length > 1) {
-      let column = children[index]
-      column.appendChild(this.selectedWindow)
-    }
-    else if(!(index < 0 || index > children.length -1)) {
+    if(!outOfBounds){
       let column = children[index]
       this.selectedWindow.parentElement.remove();
       column.appendChild(this.selectedWindow)
     }
+    /*
+    if(outOfBounds && moreThanOneChild){
+      let column = this.createNewColumn(axis)
+      column.appendChild(this.selectedWindow)
+    }
+    if(!outOfBounds && moreThanOneChild ){
+      let column = children[index]
+      column.appendChild(this.selectedWindow)
+    }
+    if(!outOfBounds){
+      let column = children[index]
+      this.selectedWindow.parentElement.remove();
+      column.appendChild(this.selectedWindow)
+    }
+  */
     
   }
 
-  moveSelectedWindowInsideColumn(axis){
-    let selectedColumn = this.selectedWindow.parentElement
+  moveSelectedWindowVertically(axis){
+    /*let selectedColumn = this.selectedWindow.parentElement
     let children = Array.from(selectedColumn.children)
     let index = children.indexOf(this.selectedWindow)+axis
+    let outOfBounds = (index < 0 || index > children.length -1)
+
     if(selectedColumn.children.length > 1){
-      //children[index]
-    }
+      if(!outOfBounds){
+        let temp = children[index]
+        selectedColumn.replaceChild(this.selectedWindow, children[index])
+        selectedColumn.appendChild(temp)
+        //children[index] = this.selectedWindow
+        console.log(selectedColumn, children, axis, index)
+      }
+    }*/
+    
   }
 
   selectWindowInColumn(axis){
@@ -107,7 +106,7 @@ export class WindowManager extends HTMLElement{
     this.selectedWindow = children[index]
   }
 
-  selectNeighboringWindow(axis){
+  selectWindowInRow(axis){
     let selectedColumn = this.selectedWindow.parentElement
     let children = Array.from(this.children)
     let index = children.indexOf(selectedColumn)+axis
@@ -117,65 +116,72 @@ export class WindowManager extends HTMLElement{
     this.selectedWindow = result
   }
 
-  listenForKeyPresses(){
-    if(KEYPRESSES.includes("Enter") && KEYPRESSES.includes("e") && !LOCKED.includes("Enter")){
-      this.createNewWindow()
-      LOCKED.push("Enter")
+  deleteSelectedWindow(){
+    let column = this.selectedWindow.parentElement
+    let children = Array.from(column.children)
+    this.selectedWindow.remove()
+    this.selectedWindow = this.querySelector(".window-container")
+    if(children.length == 1){
+      column.remove()
     }
-    if(!KEYPRESSES.includes("Enter") && LOCKED.includes("Enter")){LOCKED.splice(LOCKED.indexOf("Enter", 1))}
-
-
-    if(KEYPRESSES.includes("ArrowRight") && KEYPRESSES.includes("e") && !LOCKED.includes("ArrowRight")){
-      this.moveWindowHorizontally(1)
-      LOCKED.push("ArrowRight")
-    }   
-    if(KEYPRESSES.includes("ArrowRight") && !KEYPRESSES.includes("e") && !LOCKED.includes("ArrowRight")){
-      this.selectNeighboringWindow(1)
-      LOCKED.push("ArrowRight")
-    }
-    if(!KEYPRESSES.includes("ArrowRight") && LOCKED.includes("ArrowRight")){LOCKED.splice(LOCKED.indexOf("ArrowRight", 1))}
-
-    if(KEYPRESSES.includes("ArrowLeft") && KEYPRESSES.includes("e") && !LOCKED.includes("ArrowLeft")){
-      this.moveWindowHorizontally(-1)
-      LOCKED.push("ArrowLeft")
-    } 
-    if(KEYPRESSES.includes("ArrowLeft") && !KEYPRESSES.includes("e") && !LOCKED.includes("ArrowLeft")){
-      this.selectNeighboringWindow(-1)
-      LOCKED.push("ArrowLeft")
-    }
-    if(!KEYPRESSES.includes("ArrowLeft") && LOCKED.includes("ArrowLeft")){LOCKED.splice(LOCKED.indexOf("ArrowLeft", 1))}
-
-
-
-    if(KEYPRESSES.includes("ArrowUp") && !LOCKED.includes("ArrowUp")){
-      this.selectWindowInColumn(-1)
-      LOCKED.push("ArrowUp")
-    }
-
-    if(!KEYPRESSES.includes("ArrowUp") && LOCKED.includes("ArrowUp")){LOCKED.splice(LOCKED.indexOf("ArrowUp"),1)}
-
-
-    if(KEYPRESSES.includes("ArrowDown") && !LOCKED.includes("ArrowDown")){
-      this.selectWindowInColumn(1)
-      LOCKED.push("ArrowDown")
-    }
-    if(!KEYPRESSES.includes("ArrowDown") && LOCKED.includes("ArrowDown")){LOCKED.splice(LOCKED.indexOf("ArrowDown"),1)}
-  
   }
 
-  createNewWindow(args = {title: "none", content:"none"}){
-    let customWindow = document.createElement("custom-window")
-    customWindow.setAttribute("title", args.title)
-    customWindow.setAttribute("content", args.content)
+  createNewWindow(tag){
+    let customWindow = document.createElement(tag)
     this.querySelector("window-column").appendChild(customWindow)
     this.selectedWindow = customWindow
   }
 
   connectedCallback(){
-    this.createNewWindow(Window.programming);
-    this.createNewWindow();
+    this.createNewWindow("code-editor")
+    document.addEventListener("keydown", (e)=>{
 
-    setInterval(()=>{this.listenForKeyPresses()}, 10)
+      if(e.key == "ArrowDown" && e.shiftKey){
+        this.moveSelectedWindowVertically(1)
+        return;
+      }
+      if(e.key == "ArrowDown"){
+        this.selectWindowInColumn(1);
+        return;
+      }
+
+      if(e.key == "ArrowUp" && e.shiftKey){
+        this.moveSelectedWindowVertically(-1)
+        return;
+      }
+      if(e.key == "ArrowUp"){
+        this.selectWindowInColumn(-1);        
+        return;
+      }
+
+      if(e.key == "ArrowLeft" && e.shiftKey){
+        this.moveSelectedWindowHorizontally(-1);        
+        return;
+      }
+      if(e.key == "ArrowLeft"){
+        this.selectWindowInRow(-1);       
+        return;
+      }
+
+      if(e.key == "ArrowRight" && e.shiftKey){
+        this.moveSelectedWindowHorizontally(1);       
+        return;
+      }
+
+      if(e.key == "ArrowRight"){
+        this.selectWindowInRow(1);        
+        return;
+      }
+
+      if(e.key == "Enter" && e.shiftKey){
+        this.createNewWindow("terminal-emulator");
+        return;
+      }
+      if(e.key == "W"){
+        this.deleteSelectedWindow();
+        return;
+      }
+    })
   }
 }
 
@@ -188,29 +194,33 @@ export class CustomWindow extends HTMLElement{
     this.setAttribute("created", val)
   }
 
-  get created(){
-    if(!this.hasAttribute("created")){
-      this.setAttribute('created', "false")
-    }
-    return (this.getAttribute("created") === 'true')
-  }
 
   set title(val){
     this.setAttribute("title", val)
   }
 
   get title(){
+    if(!this.hasAttribute("title")){
+      this.setAttribute('title', "empty")
+    }
     return this.getAttribute("title")
   }
 
   set content(val){
-    this.setAttribute("content", val)
+    this._content = val;
   }
 
   get content(){
-    return this.getAttribute("content")
+    if(this._content == undefined){
+      return "Empty"
+    }
+    return this._content
   }
 
+  onFocus(){
+
+  }
+  
   removeWindow(){
     if(this.parentElement.children.length==1){
       this.parentElement.remove()
@@ -219,24 +229,20 @@ export class CustomWindow extends HTMLElement{
   }
 
   connectedCallback(){
-    if(this.created == false){
-      this.created = true
-      console.log(this.created)
-      this.innerHTML = `
-        <div class="window-titlebar">
-          <p class="window-title">${this.title}</p>
-          <div class="window-buttons">
-            <i class="ti ti-x window-close-button"></i>
-          </div>
+    this.innerHTML = `
+      <div class="window-titlebar">
+        <p class="window-title">${this.title}</p>
+        <div class="window-buttons">
+          <i class="ti ti-x window-close-button"></i>
         </div>
-        <div class="window-content">
-          ${this.content}
-        </div>
-      `  
-      this.querySelector(".window-content").innerHTML = this.content
-      this.classList.add("window-container")
-      this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
-    }
+      </div>
+      <div class="window-content">
+        ${this.content}
+      </div>
+    `  
+    this.querySelector(".window-content").innerHTML = this.content
+    this.classList.add("window-container")
+    this.queryselector(".window-close-button").addeventlistener('click', ()=>{this.removewindow()})
 
     this.querySelector(".window-title").innerHTML = this.title
 
@@ -244,6 +250,79 @@ export class CustomWindow extends HTMLElement{
   }
 }
 
+export class TerminalEmulator extends CustomWindow{
+  constructor(){
+    super();
+  }
+  connectedCallback(){
+    this.title = "Terminal Emulator"
+    this.content = ""
+    this.innerHTML = `
+      <div class="window-titlebar">
+        <p class="window-title">${this.title}</p>
+        <div class="window-buttons">     
+          <i class="ti ti-x window-close-button"></i>
+        </div>
+      </div>
+      <div class="window-content">
+        <textarea wrap='off' class='terminal-emulator-content' spellcheck='false'>${this.content}</textarea>
+      </div>
+    `  
+    this.querySelector(".terminal-emulator-content").innerHTML = this.content
+    this.classList.add("window-container")
+
+    this.querySelector(".terminal-emulator-content").addEventListener("input", (e)=>{this.parseTextEditor(e)})
+    this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
+
+
+    this.querySelector(".window-title").innerHTML = this.title
+  }
+}
+export class CustomTextEditor extends CustomWindow{
+  constructor(){
+    super();
+
+  }
+  
+  parseTextEditor(e){
+    let val = e.target.value
+    let lines = val.split("\n").length
+    let editorcols = this.querySelector(".custom-text-editor-columns")
+    this.content = val
+    editorcols.innerHTML = ""
+    for(let i = 1; i < lines+1; i++){
+      let paragraph = document.createElement("p")
+      paragraph.innerText = i
+      editorcols.appendChild(paragraph)
+    }
+  }
+  connectedCallback(){
+    this.title = "Code editor"
+    this.content = ""
+    this.innerHTML = `
+      <div class="window-titlebar">
+        <p class="window-title">${this.title}</p>
+        <div class="window-buttons">
+        </div>
+      </div>
+      <div class="window-content">
+        <div class='custom-text-editor-columns'>1</div><textarea wrap='off' class='custom-text-editor' spellcheck='false'></textarea>
+      </div>
+    `  
+    this.querySelector(".custom-text-editor").innerHTML = this.content
+    this.classList.add("window-container")
+
+    this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
+  
+    this.querySelector(".window-title").innerHTML = this.title
+  }
+  //  this.content =  "<div class='custom-text-editor-columns'>1</div><textarea wrap='off' class='custom-text-editor' spellcheck='false'></textarea>"
+ 
+     //this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
+
+}
+
 customElements.define("window-manager", WindowManager)
 customElements.define("custom-window", CustomWindow)
-customElements.define("custom-text-editor",CustomTextEditor)
+customElements.define("code-editor",CustomTextEditor)
+customElements.define("terminal-emulator",TerminalEmulator)

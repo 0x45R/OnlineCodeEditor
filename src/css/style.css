@@ -8,6 +8,9 @@
 
 #app{
   font-family: Source Code Pro;
+
+  --darkest-background-color: rgb(30,30,30);
+
   --darker-background-color: rgb(20,20,20);
   --darker-foreground-color: rgb(120,120,120);
 
@@ -28,16 +31,11 @@
 
 .custom-text-editor-columns{
   padding: 0.5em;
-  background-color: var(--dark-background-color);
+  background-color: var(--darkest-background-color);
   color: var(--dark-foreground-color);
   text-align: end;
 }
 
-custom-text-editor{
-  display: flex;
-  flex: 1;
-  gap: 0.5em;
-}
 
 textarea.custom-text-editor{
   flex: 1;
@@ -50,6 +48,18 @@ textarea.custom-text-editor{
   padding: 0.5em;
   outline: none;
 }
+textarea.terminal-emulator-content{
+  flex: 1;
+  display: flex;
+  resize: none;
+  font-family: inherit;
+  background-color: var(--darkest-background-color);
+  color: var(--dark-foreground-color);
+  border: 0px solid transparent;
+  padding: 0.5em;
+  outline: none;
+}
+
 
 window-manager{
   display: flex;
