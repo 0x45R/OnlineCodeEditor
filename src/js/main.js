@@ -5,7 +5,7 @@ document.querySelector('#app').innerHTML = `
   <div class="main-container">
     <status-bar>
       <div class="branding-container">
-        <img src="/src/img/monkey.svg" class="brand-logo" credit="https://www.svgrepo.com/svg/310921/incognito">
+        <img src="./src/img/monkey.svg" class="brand-logo">
         <p>aesthetic programming environment</p>
       </div>
       <status-indicator class="status-indicator">
