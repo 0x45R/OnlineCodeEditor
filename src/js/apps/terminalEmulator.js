@@ -1,6 +1,6 @@
-import { CustomWindow } from './customWindow.js'
-import { CodeEditor } from './codeEditor.js'
-import { IFrameWindow } from './iframe.js'
+import { CustomWindow } from '/src/js/apps/customWindow.js'
+import { CodeEditor } from '/src/js/apps/codeEditor.js'
+import { IFrameWindow } from '/src/js/apps/iframe.js'
 import bashEmulator from "bash-emulator";
 
 export const getEmulator = () => {

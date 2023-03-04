@@ -1,5 +1,5 @@
-import { CustomWindow } from "./apps/customWindow.js";
-import { TerminalEmulator } from "./apps/terminalEmulator.js";
+import { CustomWindow } from "/src/js/apps/customWindow.js";
+import { TerminalEmulator } from "/src/js/apps/terminalEmulator.js";
 
 export class WindowManager extends HTMLElement{
   constructor(){

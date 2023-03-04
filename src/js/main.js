@@ -1,6 +1,6 @@
 import '../css/style.css'
 import './windowManager.js'
-//https://unixpapa.com/js/testkey.html
+
 document.querySelector('#app').innerHTML = `
   <main>
     <status-bar>

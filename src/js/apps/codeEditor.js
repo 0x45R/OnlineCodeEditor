@@ -1,5 +1,5 @@
-import { CustomWindow } from './customWindow.js'
-import {emulator, saveState} from './terminalEmulator.js'
+import { CustomWindow } from '/src/js/apps/customWindow.js'
+import {emulator, saveState} from '/src/js/apps/terminalEmulator.js'
 
 export class CodeEditor extends CustomWindow{
   constructor(){
