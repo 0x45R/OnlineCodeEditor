@@ -17,7 +17,8 @@ export class WindowManager extends HTMLElement{
 
   get selectedWindow(){
     if(this._selectedWindow == undefined){
-      return this.querySelector(".window-container")
+      this._selectedWindow = this.querySelector(".window-container")
+      return this._selectedWindow
     }
     return this._selectedWindow
   }
@@ -25,8 +26,11 @@ export class WindowManager extends HTMLElement{
   set selectedWindow(val){
     this.selectedWindow.classList.remove("selected-window")
     this._selectedWindow = val;
-    val.onFocus()
-    val.classList.add("selected-window")
+    if(this._selectedWindow){
+      this._selectedWindow.customFocus();
+      console.log(document.activeElement, val)
+      val.classList.add("selected-window")
+    }
   }
 
   createNewColumn(axis){
@@ -118,24 +122,17 @@ export class WindowManager extends HTMLElement{
     this.selectedWindow = result
   }
 
-  deleteSelectedWindow(){
-    let column = this.selectedWindow.parentElement
-    let children = Array.from(column.children)
-    this.selectedWindow.remove()
-    this.selectedWindow = this.querySelector(".window-container")
-    if(children.length == 1){
-      column.remove()
-    }
-  }
-
   createNewWindow(tag){
     let customWindow = document.createElement(tag)
+    if(!this.querySelector('window-column')){
+      this.appendChild(document.createElement("window-column"))
+    }
     this.querySelector("window-column").appendChild(customWindow)
     this.selectedWindow = customWindow
   }
 
   connectedCallback(){
-    this.createNewWindow("code-editor")
+    this.createNewWindow("terminal-emulator")
     document.addEventListener("keydown", (e)=>{
 
       if(e.key == "ArrowDown" && e.shiftKey){
@@ -180,7 +177,8 @@ export class WindowManager extends HTMLElement{
         return;
       }
       if(e.key == "W"){
-        this.deleteSelectedWindow();
+        this.selectedWindow.removeWindow();
+        this.selectedWindow = this.querySelector('.window-container')
         return;
       }
     })
@@ -192,10 +190,20 @@ export class CustomWindow extends HTMLElement{
     super();
   }
 
+  get windowManager(){
+    return this.parentElement.parentElement
+  }
+
   set created(val){
     this.setAttribute("created", val)
   }
 
+  get created(){
+    if(!this.hasAttribute("created")){
+      return false
+    }
+    return this.getAttribute("created") === "true"
+  }
 
   set title(val){
     this.setAttribute("title", val)
@@ -218,14 +226,20 @@ export class CustomWindow extends HTMLElement{
     }
     return this._content
   }
-
-  onFocus(){
-
+ 
+  customFocus(){
+    this.querySelector('.window-content').focus()
   }
-  
+
   removeWindow(){
+    if(!this.parentElement){
+      return;
+    }
     if(this.parentElement.children.length==1){
       this.parentElement.remove()
+    }
+    if(this.windowManager){
+      console.log(this.windowManager.selectedWindow);
     }
     this.remove()
   }
@@ -271,7 +285,10 @@ export class TerminalEmulator extends CustomWindow{
     })
     this.emulator.commands.clear = (env)=> {
       this.content = ''
-      env.exit()
+    }
+    this.emulator.commands.exit = (env) => {
+      console.log(this) 
+      this.removeWindow();
     }
   }
   set content(val){
@@ -297,40 +314,50 @@ export class TerminalEmulator extends CustomWindow{
 
   log(result){
     if(result){
-      this.content = this.content + result+"\n"
+      this.content = this.content + result+"\n"          
+      this.querySelector('.terminal-emulator-content').scrollTop = this.querySelector(".terminal-emulator-content").scrollHeight
     }
   }
+ 
+  customFocus(){
+    this.querySelector(".terminal-emulator-input").focus()
+  }
+
+
   connectedCallback(){
-    this.title = "Terminal Emulator"
-    this.content = ""
-    this.innerHTML = `
-      <div class="window-titlebar">
-        <p class="window-title">${this.title}</p>
-        <div class="window-buttons">     
-          <i class="ti ti-x window-close-button"></i>
+    if(!this.created){
+      this.created =  true
+      this.title = "Terminal Emulator"
+      this.content = ""
+      this.innerHTML = `
+        <div class="window-titlebar">
+          <p class="window-title">${this.title}</p>
+          <div class="window-buttons">     
+            <i class="ti ti-x window-close-button"></i>
+          </div>
         </div>
-      </div>
-      <div class="window-terminal-content">
-        <p class='terminal-emulator-content' spellcheck='false'></p>
-        <input type='text' class='terminal-emulator-input'></input>
-      </div>
-    `  
-    this.querySelector(".terminal-emulator-content").innerHTML = this.content
-    this.classList.add("window-container")
+        <div class="window-terminal-content">
+          <p class='terminal-emulator-content' spellcheck='false'></p>
+          <input type='text' class='terminal-emulator-input'></input>
+        </div>
+      `  
+      this.querySelector(".terminal-emulator-content").innerHTML = this.content
+      this.classList.add("window-container")
 
-    this.querySelector(".window-title").innerHTML = this.title
+      this.querySelector(".window-title").innerHTML = this.title
 
-    this.querySelector(".terminal-emulator-input").addEventListener('keydown', (e)=>{
-      console.log(e)
-      let target = this.querySelector('.terminal-emulator-input')
-      if(e.key == "Enter"){
-        this.run(target.value)
-        target.value = ""
-      }
-    }) //ddEventListener("input", (e)=>{this.parseEmulator(e)})
-    this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
+      this.querySelector(".terminal-emulator-input").addEventListener('keydown', (e)=>{
+        console.log(e)
+        let target = this.querySelector('.terminal-emulator-input')
+        if(e.key == "Enter"){
+          this.run(target.value)
+          target.value = ""
+        }
+      })
+      this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
 
-    this.run('pwd')
+      this.run('pwd')
+    }
   }
 }
 export class CustomTextEditor extends CustomWindow{
@@ -338,7 +365,11 @@ export class CustomTextEditor extends CustomWindow{
     super();
 
   }
-  
+
+  customFocus(){
+    this.querySelector(".custom-text-editor").focus()
+  }
+
   parseTextEditor(e){
     let val = e.target.value
     let lines = val.split("\n").length
