@@ -18,7 +18,7 @@
   --dark-foreground-color: rgb(140,140,140);
 }
 
-.main-container{
+main{
   width: 100%;
   height: 100vh;
 
@@ -47,6 +47,11 @@ textarea.custom-text-editor{
   border: 0px solid transparent;
   padding: 0.5em;
   outline: none;
+}
+.iframe-window-content{
+  flex: 1;
+  background-color: white;
+
 }
 .terminal-emulator-content{
   flex: 1;

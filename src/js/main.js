@@ -2,7 +2,7 @@ import '../css/style.css'
 import './windowManager.js'
 //https://unixpapa.com/js/testkey.html
 document.querySelector('#app').innerHTML = `
-  <div class="main-container">
+  <main>
     <status-bar>
       <div class="branding-container">
         <img src="./src/img/monkey.svg" class="brand-logo">
@@ -16,5 +16,5 @@ document.querySelector('#app').innerHTML = `
     <window-manager>
 
     </window-manager>
-  </div>
+  </main>
 `
