@@ -48,7 +48,7 @@ export class IFrameWindow extends CustomWindow{
         <p class="window-title">${this.title}</p>
         <div class="window-buttons">          
           <i class="ti ti-refresh window-refresh-button"></i>         
-          <i class="ti ti-download code-download-button"></i>
+          <i class="ti ti-download window-download-button"></i>
           <i class="ti ti-x window-close-button"></i>
         </div>
       </div>
@@ -59,6 +59,22 @@ export class IFrameWindow extends CustomWindow{
     this.content = this.content
     this.classList.add("window-container")
 
+    this.querySelector(".window-download-button").addEventListener('click', ()=>{
+      function download(file, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href',
+        'data:text/plain;charset=utf-8, '
+        + encodeURIComponent(text));
+        element.setAttribute('download', file);
+     
+        document.body.appendChild(element);
+        element.click();
+ 
+        document.body.removeChild(element);
+      }
+   
+      emulator.read(this.file).then((data)=>download(this.file, data));
+    })
     this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
     this.querySelector(".window-refresh-button").addEventListener("click", ()=>{
       emulator.read(this.file).then((data)=>{

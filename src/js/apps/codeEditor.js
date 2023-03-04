@@ -68,7 +68,7 @@ export class CodeEditor extends CustomWindow{
         <div class="window-buttons">          
           <i class="ti ti-player-play"></i>
           <i class="ti ti-device-floppy code-save-button"></i>
-          <i class="ti ti-download code-download-button"></i>
+          <i class="ti ti-download window-download-button"></i>
           <i class="ti ti-x window-close-button"></i>
         </div>
       </div>
@@ -78,7 +78,23 @@ export class CodeEditor extends CustomWindow{
     `  
     this.querySelector(".custom-text-editor").innerHTML = this.content
     this.classList.add("window-container")
-
+ 
+    this.querySelector(".window-download-button").addEventListener('click', ()=>{
+      function download(file, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href',
+        'data:text/plain;charset=utf-8, '
+        + encodeURIComponent(text));
+        element.setAttribute('download', file);
+     
+        document.body.appendChild(element);
+        element.click();
+ 
+        document.body.removeChild(element);
+      }
+   
+      emulator.read(this.file).then((data)=>download(this.file, data));
+    })
     this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
     this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
     this.querySelector(".code-save-button").addEventListener("click", ()=>{this.saveContent()})
