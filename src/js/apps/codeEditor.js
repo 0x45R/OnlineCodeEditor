@@ -1,5 +1,6 @@
+import { IFrameWindow } from './iframe';
 import { CustomWindow } from '/src/js/apps/customWindow.js'
-import {emulator, saveState} from '/src/js/apps/terminalEmulator.js'
+import { TerminalEmulator, emulator, saveState} from '/src/js/apps/terminalEmulator.js'
 
 export class CodeEditor extends CustomWindow{
   constructor(){
@@ -8,7 +9,7 @@ export class CodeEditor extends CustomWindow{
   }
    get content(){
     if(this._content == undefined){
-      return "Empty"
+      return ""
     }
     return this._content
   }
@@ -47,8 +48,8 @@ export class CodeEditor extends CustomWindow{
     this.querySelector(".custom-text-editor").focus()
   }
 
-  parseTextEditor(e){
-    let val = e.target.value
+  parseTextEditor(){
+    let val = this.querySelector(".custom-text-editor").value
     let lines = val.split("\n").length
     let editorcols = this.querySelector(".custom-text-editor-columns")
     this.content = val
@@ -66,7 +67,13 @@ export class CodeEditor extends CustomWindow{
       <div class="window-titlebar">
         <p class="window-title">${this.title}</p>
         <div class="window-buttons">          
-          <i class="ti ti-player-play window-button"></i>
+          <i class="ti ti-player-play code-run-button window-button"></i>
+          <select class="code-type-choose window-input">
+            <option value="auto">automatic</option>
+            <option value="javascript">javascript</option>
+            <option value="html">html</option>
+            <option value="python">python</option>
+          </select>
           <i class="ti ti-device-floppy code-save-button window-button"></i>
           <i class="ti ti-download window-download-button window-button"></i>
         </div>
@@ -94,11 +101,47 @@ export class CodeEditor extends CustomWindow{
    
       emulator.read(this.file).then((data)=>download(this.file, data));
     })
-    this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
+    this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor()})
+    this.querySelector(".custom-text-editor").addEventListener("keydown", (e)=>{
+      if(e.key == "Tab"){
+        e.preventDefault();
+        this.content=this.content+" "
+      }
+    })
     this.querySelector(".code-save-button").addEventListener("click", ()=>{this.saveContent()})
-    
-    this.querySelector(".window-title").innerHTML = this.title
+   
+    this.querySelector('.code-run-button').addEventListener('click', ()=>{
+      let val =  this.querySelector('.code-type-choose').value
+      let file = this.file.split('.')
+      let extension = file[1]
+      if(val=="auto"){
+        switch(extension){
+          default:
+            val = "html"
+          case "js": 
+            val = "javascript"
+          case "html":
+            val = "html"
+          case "py":
+            val = "python"
 
+        }
+      }
+      switch(val){
+        case "html":
+          document.querySelector('window-manager').createNewWindow(IFrameWindow.new(this.file))
+          break;
+        case "javascript":
+          document.querySelector('window-manager').createNewWindow(TerminalEmulator.new(`run ${this.file}`))
+          break;
+        case "python":
+          document.querySelector('window-manager').createNewWindow(TerminalEmulator.new(`python ${this.file}`))
+          break;
+        }
+    })
+
+    this.querySelector(".window-title").innerHTML = this.title
+    this.parseTextEditor()
     this.addEventListener('mouseover', ()=>{this.customFocus()})
 
 

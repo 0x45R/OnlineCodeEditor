@@ -49,6 +49,13 @@ main{
   height: 100%;
 }
 
+.window-input{
+  padding: 0.25em;
+  background-color: var(--dark-background-color);
+  border: 1px solid var(--dark-foreground-color);
+  border-radius: 5px;
+  color: var(--dark-foreground-color);
+}
 
 textarea.custom-text-editor{
   flex: 1;
@@ -100,7 +107,7 @@ textarea.custom-text-editor{
 
 window-manager{
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: row wrap;
   flex:1;
 
   overflow: hidden;
@@ -111,7 +118,7 @@ window-manager{
 }
 
 #app::before{
-  content: "ctrl+shift+enter";
+  content: "alt+enter";
   position:absolute;
   display: flex;
   height: 100%;
@@ -216,8 +223,6 @@ window-column{
   flex-flow: row wrap;
   justify-content: space-evenly;
   align-items: center;
-  border-left: 1px solid var(--dark-foreground-color);
-  padding-left: 1em;
   gap: 1em;
 }
 .window-content{

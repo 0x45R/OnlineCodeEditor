@@ -11,7 +11,15 @@ export const getEmulator = () => {
       fileSystem: {
         "/":{type:'dir', modified:Date.now()},
       "/welcome.html":{type:'file', content:`<style>*{margin:0;padding:0;box-sizing:border-box; background: black; color: green;}</style><div style="display: flex; gap: 1em;flex-flow: column; justify-content: center; align-items:center; height:100%">
-<h1>Happy hacking :)</h1><h4>Don't know where to start? <br>Start with typing "commands" in terminal</h4></div>`, modified: Date.now()}
+<h1>Happy hacking :)</h1><h4>Don't know where to start? <br>Start with typing "commands" in terminal</h4></div>`, modified: Date.now()},
+        "/autostart.js":{type:'file',content:`
+let windowManager = document.querySelector('window-manager')
+let iframewindow = windowManager.createNewWindow(IFrameWindow.new("welcome.html"))
+windowManager.createNewWindow(CodeEditor.new("autostart.js"))
+windowManager.moveSelectedWindowHorizontally(-1);
+windowManager.createNewWindow(CodeEditor.new("welcome.html"))
+`}
+        
       }
     })
   }
@@ -41,7 +49,7 @@ emulator.commands.exit = (env, args) => {
 emulator.commands.edit = (env, args) => {
   if(args.join('').trim().length == 0){
     env.error("No file to open")
-    env.exit()
+    env.exit(-1)
     return;
   }
   document.querySelector('window-manager').createNewWindow(CodeEditor.new(args[0]))
@@ -50,11 +58,55 @@ emulator.commands.edit = (env, args) => {
 emulator.commands.iframe = (env, args) => {
   if(args.join('').trim().length == 0){
     env.error("No file to open")
-    env.exit()
+    env.exit(-1)
     return;
   }
   document.querySelector('window-manager').createNewWindow(IFrameWindow.new(args[0]))
   env.exit()
+}
+emulator.commands.run = (env, args)=>{
+  if(args.join('').trim().length == 0){
+    env.error("No file to open")
+    env.exit(-1)
+    return;
+  }
+  
+  let file = args[0]
+
+  emulator.read(file).then(
+    (data)=>{
+      let result = eval(data)
+      console.log(result)
+      env.exit()
+    }
+  ).catch(
+    (data)=>{
+      env.error(data)
+      env.exit(-1)
+    }
+  )
+}
+emulator.commands.python = (env, args)=>{
+  if(args.join('').trim().length == 0){
+    env.error("No file to open")
+    env.exit(-1)
+    return;
+  }
+  
+  let file = args[0]
+
+  emulator.read(file).then(
+    (data)=>{
+      let result = eval(data)
+      console.log(result)
+      env.exit()
+    }
+  ).catch(
+    (data)=>{
+      env.error(data)
+      env.exit(-1)
+    }
+  )
 }
 // https://gist.github.com/zentala/1e6f72438796d74531803cc3833c039c
 function formatBytes(bytes,decimals) {
@@ -93,9 +145,15 @@ export class TerminalEmulator extends CustomWindow{
     super();
   }
 
-  static new(){
+  static new(command){
     let elem = document.createElement("terminal-emulator")
-    console.log(elem)
+    console.log(elem, command)
+    elem.connectedCallback()
+    if(command != undefined){
+      elem.run(command)
+    }else{
+      elem.run('pwd')
+    }
     return elem
   }
 
@@ -129,7 +187,9 @@ export class TerminalEmulator extends CustomWindow{
       return;
     }if(result){
       this.content = this.content + result+"\n"          
-      this.querySelector('.terminal-emulator-content').scrollTop = this.querySelector(".terminal-emulator-content").scrollHeight
+      if(this.querySelector('.terminal-emulator-content')){
+        this.querySelector('.terminal-emulator-content').scrollTop = this.querySelector(".terminal-emulator-content").scrollHeight
+      }
     }
   }
  
@@ -177,7 +237,6 @@ export class TerminalEmulator extends CustomWindow{
         }
       }
     })      
-    this.run('pwd')
   }
 
   }

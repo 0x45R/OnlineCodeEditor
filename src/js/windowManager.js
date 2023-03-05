@@ -134,13 +134,10 @@ export class WindowManager extends HTMLElement{
   }
 
   connectedCallback(){
-    this.createNewWindow(TerminalEmulator.new())
-    let iframewindow = this.createNewWindow(IFrameWindow.new("welcome.html"))
-    iframewindow.classList.add("window-floating")
-    iframewindow.style.right = "0px"
-    iframewindow.style.bottom = "0px"
-    document.addEventListener("keydown", (e)=>{
+    this.createNewWindow(TerminalEmulator.new("run autostart.js"))
 
+    document.addEventListener("keydown", (e)=>{
+      console.log(e.key, e.shiftKey, e.altKey)
       if(e.key == "ArrowDown" && e.shiftKey && e.altKey){
         this.moveSelectedWindowVertically(1)
         return;
@@ -150,7 +147,7 @@ export class WindowManager extends HTMLElement{
         return;
       }
 
-      if(e.key == "ArrowUp" && e.shiftKey && e.altKey){
+      if(e.key == "ArrowUp" && e.shiftKey){
         this.moveSelectedWindowVertically(-1)
         return;
       }
@@ -159,26 +156,30 @@ export class WindowManager extends HTMLElement{
         return;
       }
 
-      if(e.key == "ArrowLeft" && e.shiftKey && e.altKey){
+      if(e.key == "ArrowLeft" && e.shiftKey){
+        e.preventDefault();
         this.moveSelectedWindowHorizontally(-1);        
         return;
       }
-      if(e.key == "ArrowLeft" && e.altKey){
+      if(e.key == "ArrowLeft" && e.altKey ){
+        e.preventDefault();
         this.selectWindowInRow(-1);       
         return;
       }
 
-      if(e.key == "ArrowRight" && e.shiftKey && e.altKey){
+      if(e.key == "ArrowRight" && e.shiftKey){
+        e.preventDefault();
         this.moveSelectedWindowHorizontally(1);       
         return;
       }
 
-      if(e.key == "ArrowRight" && e.altKey){
-        this.selectWindowInRow(1);        
+      if(e.key == "ArrowRight" && e.altKey ){
+        e.preventDefault();
+        this.selectWindowInRow(1);       
         return;
       }
 
-      if(e.key == "Enter" && e.shiftKey && e.altKey){
+      if(e.key == "Enter" && e.altKey){
         this.createNewWindow(TerminalEmulator.new())
         return;
       }
