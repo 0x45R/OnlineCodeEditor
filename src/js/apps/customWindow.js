@@ -60,6 +60,53 @@ export class CustomWindow extends HTMLElement{
   }
 
   connectedCallback(){
+    if(!this.created || this.reloadEverytime){
+      this.created =  true
+      this.basicStructure();
+      
+      let buttons = document.createElement('div')
+      buttons.classList.add("basic-buttons")
+      buttons.innerHTML = `<i class="ti ti-arrows-move window-move-button window-button"></i><i class="ti ti-x window-close-button window-button"></i>`
+      this.querySelector(".window-buttons").appendChild(buttons)
+
+      this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
+      this.addEventListener('mouseover', ()=>{this.customFocus()})
+    
+      document.addEventListener('mousemove', (e)=>{
+        floatWindow(e)
+      })
+
+      this.querySelector('.window-move-button').addEventListener('mousedown', (e)=>{
+        if(!this.classList.contains("follow-cusor")){
+          this.classList.add('follow-cursor')
+          this.classList.add("window-floating")
+          floatWindow(e)
+        }
+      })
+
+      this.querySelector('.window-move-button').addEventListener('mouseup', (e)=>{
+        if(this.classList.contains("follow-cursor")){
+          this.classList.remove('follow-cursor')
+          this.classList.remove('window-floating')
+        }
+      })
+
+      const floatWindow = (e) => {
+        let result = this.querySelector('.window-move-button')
+        let childBoundingRect = result.getBoundingClientRect()
+        let parentBoundingRect = this.getBoundingClientRect()
+
+        let leftOffset = childBoundingRect.left - parentBoundingRect.left
+        let topOffset = childBoundingRect.top - parentBoundingRect.top
+
+        if(this.classList.contains("follow-cursor")){
+          this.style.top = e.clientY-(topOffset + childBoundingRect.height*2.5)+"px"//childBoundingRect.top - parentBoundingRect.top  +"px"//e.clientY-result.getBoundingClientRect().y + "px"
+          this.style.left = e.clientX-(leftOffset + childBoundingRect.width)+'px'//childBoundingRect.left - parentBoundingRect.left   + "px"//e.clientX-result.getBoundingClientRect().x+ "px"
+        }
+      }
+    } 
+  }
+  basicStructure(){
     this.innerHTML = `
       <div class="window-titlebar">
         <p class="window-title">${this.title}</p>
@@ -77,8 +124,6 @@ export class CustomWindow extends HTMLElement{
     this.addEventListener('mouseover', ()=>{this.customFocus()})
 
     this.querySelector(".window-title").innerHTML = this.title
-
-    
   }
 }
 customElements.define("custom-window", CustomWindow)

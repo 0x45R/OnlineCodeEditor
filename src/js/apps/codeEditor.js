@@ -19,7 +19,7 @@ export class CodeEditor extends CustomWindow{
   }
 
   saveContent(){
-    emulator.remove(this.file).then(()=>{emulator.write(this.file, this.content)}).then(()=>{saveState()})
+    emulator.remove(this.file).then(()=>{emulator.write(this.file, this.content)}).catch(()=>{emulator.write(this.file, this.content)}).finally(()=>{saveState()})
     console.log(this.file, this.content, "CONTENT")
   }
 
@@ -60,16 +60,15 @@ export class CodeEditor extends CustomWindow{
       editorcols.appendChild(paragraph)
     }
   }
-  connectedCallback(){
+  basicStructure(){
     this.title = `code editor - ${this.file}`
     this.innerHTML = `
       <div class="window-titlebar">
         <p class="window-title">${this.title}</p>
         <div class="window-buttons">          
-          <i class="ti ti-player-play"></i>
-          <i class="ti ti-device-floppy code-save-button"></i>
-          <i class="ti ti-download window-download-button"></i>
-          <i class="ti ti-x window-close-button"></i>
+          <i class="ti ti-player-play window-button"></i>
+          <i class="ti ti-device-floppy code-save-button window-button"></i>
+          <i class="ti ti-download window-download-button window-button"></i>
         </div>
       </div>
       <div class="window-content">
@@ -96,7 +95,6 @@ export class CodeEditor extends CustomWindow{
       emulator.read(this.file).then((data)=>download(this.file, data));
     })
     this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor(e)})
-    this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
     this.querySelector(".code-save-button").addEventListener("click", ()=>{this.saveContent()})
     
     this.querySelector(".window-title").innerHTML = this.title

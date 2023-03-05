@@ -5,6 +5,7 @@ import {emulator, saveState} from '/src/js/apps/terminalEmulator.js'
 export class IFrameWindow extends CustomWindow{
   constructor(){
     super();
+    this.reloadEverytime = true;
   }
  
   static new(file){
@@ -40,16 +41,14 @@ export class IFrameWindow extends CustomWindow{
     }
     return this._file
   }
-  connectedCallback(){
-    this.created =  true
+  basicStructure(){
     this.title = `iframe - ${this.file}`
     this.innerHTML = `
       <div class="window-titlebar">
         <p class="window-title">${this.title}</p>
         <div class="window-buttons">          
-          <i class="ti ti-refresh window-refresh-button"></i>         
-          <i class="ti ti-download window-download-button"></i>
-          <i class="ti ti-x window-close-button"></i>
+          <i class="ti ti-refresh window-refresh-button window-button"></i>         
+          <i class="ti ti-download window-download-button window-button"></i>     
         </div>
       </div>
       <div class="window-content">
@@ -75,7 +74,6 @@ export class IFrameWindow extends CustomWindow{
    
       emulator.read(this.file).then((data)=>download(this.file, data));
     })
-    this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
     this.querySelector(".window-refresh-button").addEventListener("click", ()=>{
       emulator.read(this.file).then((data)=>{
         console.log(data);this.content=data;this.connectedCallback()

@@ -10,6 +10,8 @@ export const getEmulator = () => {
       workingDirectory: "/",
       fileSystem: {
         "/":{type:'dir', modified:Date.now()},
+      "/welcome.html":{type:'file', content:`<style>*{margin:0;padding:0;box-sizing:border-box; background: black; color: green;}</style><div style="display: flex; gap: 1em;flex-flow: column; justify-content: center; align-items:center; height:100%">
+<h1>Happy hacking :)</h1><h4>Don't know where to start? <br>Start with typing "commands" in terminal</h4></div>`, modified: Date.now()}
       }
     })
   }
@@ -137,48 +139,48 @@ export class TerminalEmulator extends CustomWindow{
   }
 
 
-  connectedCallback(){
-    if(!this.created){
-      this.created =  true
-      this.title = "terminal emulator"
-      this.content = ""
-      this.innerHTML = `
-        <div class="window-titlebar">
-          <p class="window-title">${this.title}</p>
-          <div class="window-buttons">     
-            <i class="ti ti-x window-close-button"></i>
-          </div>
+  basicStructure(){
+    this.title = "terminal emulator"
+    this.content = ""
+    this.innerHTML = `
+      <div class="window-titlebar">
+        <p class="window-title">${this.title}</p>
+        <div class="window-buttons">    
         </div>
-        <div class="window-terminal-content">
-          <p class='terminal-emulator-content' spellcheck='false'></p>
-          <input type='text' class='terminal-emulator-input'></input>
-        </div>
-      `  
-      this.terminal_emulator_content = this.querySelector(".terminal-emulator-content")
-      this.terminal_emulator_content.innerHTML = this.content
-      this.classList.add("window-container")
+      </div>
+      <div class="window-terminal-content">
+        <p class='terminal-emulator-content' spellcheck='false'></p>
+        <input type='text' class='terminal-emulator-input'></input>
+      </div>
+    `  
+    this.terminal_emulator_content = this.querySelector(".terminal-emulator-content")
+    this.terminal_emulator_content.innerHTML = this.content
+    this.classList.add("window-container")
 
-      this.querySelector(".window-title").innerHTML = this.title
+    this.querySelector(".window-title").innerHTML = this.title
 
-      this.terminal_emulator_input = this.querySelector('.terminal-emulator-input')
-      this.terminal_emulator_input.addEventListener('keydown', (e)=>{
-        console.log(e)
-        let target = this.terminal_emulator_input
-        if(e.key == "Enter"){
-          if(target.value.trim().length != 0){
-            this.run(target.value)
-            target.value = ""
-          }
+    this.terminal_emulator_input = this.querySelector('.terminal-emulator-input')
+    this.terminal_emulator_input.addEventListener('keydown', (e)=>{
+      let target = this.terminal_emulator_input
+      if(e.key == "ArrowUp"){
+        e.preventDefault();
+        emulator.getHistory().then((data)=>{target.value = data[0]})
+      }
+      if(e.key == "ArrowDown" ){
+        e.preventDefault();
+        emulator.getHistory().then((data)=>{target.value = data[2]})
+      }
+      if(e.key == "Enter"){
+        if(target.value.trim().length != 0){
+          this.run(target.value)
+          target.value = ""
         }
-      })
-      this.querySelector(".window-close-button").addEventListener('click', ()=>{this.removeWindow()})
-      this.addEventListener('mouseover', ()=>{this.customFocus()})
-
-
-      this.run('pwd')
-    }
+      }
+    })      
+    this.run('pwd')
   }
-}
+
+  }
 
 customElements.define("terminal-emulator",TerminalEmulator)
 

@@ -1,3 +1,4 @@
+import { IFrameWindow } from "./apps/iframe";
 import { CustomWindow } from "/src/js/apps/customWindow.js";
 import { TerminalEmulator } from "/src/js/apps/terminalEmulator.js";
 
@@ -29,7 +30,6 @@ export class WindowManager extends HTMLElement{
       if(this._selectedWindow != val){
         this._selectedWindow.customFocus();
       }
-      console.log(document.activeElement, val)
       val.classList.add("selected-window")
     }
   }
@@ -130,22 +130,27 @@ export class WindowManager extends HTMLElement{
     }
     this.querySelector("window-column").appendChild(customWindow)
     this.selectedWindow = customWindow
+    return customWindow
   }
 
   connectedCallback(){
     this.createNewWindow(TerminalEmulator.new())
+    let iframewindow = this.createNewWindow(IFrameWindow.new("welcome.html"))
+    iframewindow.classList.add("window-floating")
+    iframewindow.style.right = "0px"
+    iframewindow.style.bottom = "0px"
     document.addEventListener("keydown", (e)=>{
 
-      if(e.key == "ArrowDown" && e.shiftKey && e.ctrlKey){
+      if(e.key == "ArrowDown" && e.shiftKey && e.altKey){
         this.moveSelectedWindowVertically(1)
         return;
       }
-      if(e.key == "ArrowDown" && e.ctrlKey){
+      if(e.key == "ArrowDown" && e.altKey){
         this.selectWindowInColumn(1);
         return;
       }
 
-      if(e.key == "ArrowUp" && e.shiftKey && e.ctrlKey){
+      if(e.key == "ArrowUp" && e.shiftKey && e.altKey){
         this.moveSelectedWindowVertically(-1)
         return;
       }
@@ -154,30 +159,30 @@ export class WindowManager extends HTMLElement{
         return;
       }
 
-      if(e.key == "ArrowLeft" && e.shiftKey && e.ctrlKey){
+      if(e.key == "ArrowLeft" && e.shiftKey && e.altKey){
         this.moveSelectedWindowHorizontally(-1);        
         return;
       }
-      if(e.key == "ArrowLeft" && e.ctrlKey){
+      if(e.key == "ArrowLeft" && e.altKey){
         this.selectWindowInRow(-1);       
         return;
       }
 
-      if(e.key == "ArrowRight" && e.shiftKey && e.ctrlKey){
+      if(e.key == "ArrowRight" && e.shiftKey && e.altKey){
         this.moveSelectedWindowHorizontally(1);       
         return;
       }
 
-      if(e.key == "ArrowRight" && e.ctrlKey){
+      if(e.key == "ArrowRight" && e.altKey){
         this.selectWindowInRow(1);        
         return;
       }
 
-      if(e.key == "Enter" && e.shiftKey && e.ctrlKey){
+      if(e.key == "Enter" && e.shiftKey && e.altKey){
         this.createNewWindow(TerminalEmulator.new())
         return;
       }
-      if(e.key == "Q"  && e.ctrlKey){
+      if(e.key == "Q"  && e.altKey){
         this.selectedWindow.removeWindow();
         this.selectedWindow = this.querySelector('.window-container')
         return;
