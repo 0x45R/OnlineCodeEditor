@@ -20,7 +20,9 @@ export class CodeEditor extends CustomWindow{
   }
 
   saveContent(){
-    emulator.remove(this.file).then(()=>{emulator.write(this.file, this.content)}).catch(()=>{emulator.write(this.file, this.content)}).finally(()=>{saveState()})
+    emulator.remove(this.file)
+      .then(()=>{emulator.write(this.file, this.content).then(saveState)})
+      .catch(()=>{emulator.write(this.file, this.content).then(saveState)})
     console.log(this.file, this.content, "CONTENT")
   }
 
