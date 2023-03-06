@@ -16,7 +16,7 @@ export class CodeEditor extends CustomWindow{
  
   set content(val){
     this._content = val;   
-    this.querySelector(".custom-text-editor").innerHTML = val
+    this.querySelector(".custom-text-editor").innerHTML = val;
   }
 
   saveContent(){
@@ -39,7 +39,7 @@ export class CodeEditor extends CustomWindow{
     let elem = document.createElement("code-editor")
     elem.file = file
     console.log("E", emulator)
-    emulator.read(file).then((data)=>{console.log(data);elem.content=data})
+    emulator.read(file).then((data)=>{console.log(data);elem.content=data;elem.parseTextEditor()})
     return elem
   }
 
@@ -60,6 +60,7 @@ export class CodeEditor extends CustomWindow{
       paragraph.innerText = i
       editorcols.appendChild(paragraph)
     }
+    this.querySelector(".custom-text-editor").style.height = this.querySelector(".custom-text-editor-columns").clientHeight + "px"
   }
   basicStructure(){
     this.title = `code editor - ${this.file}`
@@ -79,12 +80,14 @@ export class CodeEditor extends CustomWindow{
         </div>
       </div>
       <div class="window-content">
-        <div class='custom-text-editor-columns'>1</div><textarea wrap='off' class='custom-text-editor' spellcheck='false'></textarea>
+        <div class='custom-text-editor-columns'>1</div>
+        <textarea wrap='off' class='custom-text-editor' spellcheck='false'>
+        
+        </textarea>
       </div>
     `  
     this.querySelector(".custom-text-editor").innerHTML = this.content
     this.classList.add("window-container")
- 
     this.querySelector(".window-download-button").addEventListener('click', ()=>{
       function download(file, text) {
         var element = document.createElement('a');
@@ -111,20 +114,21 @@ export class CodeEditor extends CustomWindow{
     this.querySelector(".code-save-button").addEventListener("click", ()=>{this.saveContent()})
    
     this.querySelector('.code-run-button').addEventListener('click', ()=>{
-      let val =  this.querySelector('.code-type-choose').value
+      this.saveContent()
+      let val = this.querySelector('.code-type-choose').value
       let file = this.file.split('.')
       let extension = file[1]
       if(val=="auto"){
         switch(extension){
-          default:
-            val = "html"
           case "js": 
             val = "javascript"
-          case "html":
-            val = "html"
+            break;
           case "py":
             val = "python"
-
+            break;
+          case "html":
+            val = "html"
+            break;
         }
       }
       switch(val){
@@ -141,7 +145,6 @@ export class CodeEditor extends CustomWindow{
     })
 
     this.querySelector(".window-title").innerHTML = this.title
-    this.parseTextEditor()
     this.addEventListener('mouseover', ()=>{this.customFocus()})
 
 

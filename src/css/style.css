@@ -4,6 +4,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+
 }
 
 #app{
@@ -46,7 +47,8 @@ main{
   background-color: var(--darkest-background-color);
   color: var(--dark-foreground-color);
   text-align: end;
-  height: 100%;
+  height: max-content;
+  min-height: 100%;
 }
 
 .window-input{
@@ -57,7 +59,7 @@ main{
   color: var(--dark-foreground-color);
 }
 
-textarea.custom-text-editor{
+.custom-text-editor{
   flex: 1;
   display: flex;
   resize: none;
@@ -65,11 +67,10 @@ textarea.custom-text-editor{
   background-color: var(--dark-background-color);
   color: var(--dark-foreground-color);
   border: 0px solid transparent;
-  white-space: pre-wrap;
+  white-space: pre;
   padding: 0.5em;
   outline: none;
-  overflow-y: hidden;
-  height: 100%;
+  min-height: 100%;
 }
 .iframe-window-content{
   flex: 1;
@@ -132,7 +133,7 @@ window-manager{
 .window-container{
   display: flex;
   flex-direction: column;
-  flex:1;
+  flex:1 0 0px;
 
   padding: 1em;
   gap: 0.5em;
