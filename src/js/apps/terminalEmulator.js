@@ -191,6 +191,7 @@ export class TerminalEmulator extends CustomWindow{
         this.querySelector('.terminal-emulator-content').scrollTop = this.querySelector(".terminal-emulator-content").scrollHeight
       }
     }
+    saveState()
   }
  
   customFocus(){

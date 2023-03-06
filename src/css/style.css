@@ -71,6 +71,7 @@ main{
   padding: 0.5em;
   outline: none;
   min-height: 100%;
+  tab-size: 2;
 }
 .iframe-window-content{
   flex: 1;
@@ -108,7 +109,7 @@ main{
 
 window-manager{
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row nowrap;
   flex:1;
 
   overflow: hidden;

@@ -106,9 +106,11 @@ export class CodeEditor extends CustomWindow{
     })
     this.querySelector(".custom-text-editor").addEventListener("input", (e)=>{this.parseTextEditor()})
     this.querySelector(".custom-text-editor").addEventListener("keydown", (e)=>{
+      console.log(e.key)
       if(e.key == "Tab"){
         e.preventDefault();
-        this.content=this.content+" "
+        document.execCommand('insertText', false, '\t');
+        this.parseTextEditor()
       }
     })
     this.querySelector(".code-save-button").addEventListener("click", ()=>{this.saveContent()})
